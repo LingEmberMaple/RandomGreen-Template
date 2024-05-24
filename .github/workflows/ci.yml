@@ -1,0 +1,35 @@
+name: ci
+
+on:
+  # schedule:
+  #   - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  randomgreen:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.PAT }}
+
+      - name: Randomize cron
+        uses: NeddM/cron-randomizer@v1.1.2
+        with:
+          whatToRandomize: "y y n n n"
+
+      - name: Random green
+        run: |
+          git config --local user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+          git config --local user.name "${{ github.actor }}"
+          git commit -am "a commit a day keeps your girlfriend away"
+          git pull --rebase -Xtheirs
+          git push
